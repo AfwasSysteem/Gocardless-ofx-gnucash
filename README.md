@@ -1,10 +1,90 @@
 # GoCardless → OFX importscript / import script
 
-*Nederlands hieronder — English below.*
+*Nederlands hieronder*
 
 ---
 
-## Nederlands
+
+## English
+
+Fetches bank transactions via GoCardless Bank Account Data and writes them
+per account as an `.ofx` file, ready to import into GnuCash.
+
+### Installation
+
+```bash
+pip install -r requirements.txt
+cp .env.example .env
+```
+
+Fill in your GoCardless `GC_SECRET_ID` and `GC_SECRET_KEY` in `.env`
+(create these at https://bankaccountdata.gocardless.com/ → User secrets).
+
+### Language
+
+The very first time you run `python main.py`, it asks whether you want to
+use Dutch or English. That choice is saved in **`language.txt`** (plain
+text: `nl` or `en`) and won't be asked again after that.
+
+Want to change the language later? Open `language.txt` in a text editor
+and change its contents to `nl` or `en` — or delete the file to be asked
+again on the next run.
+
+### Usage
+
+```bash
+python main.py
+```
+
+- On startup you pick a bank from your **favorites** (banks you've used
+  before), or choose "Search for another bank..." to look up any bank
+  supported by GoCardless (e.g. Rabobank, Bunq, Triodos, or a foreign
+  bank). Enter a country code (e.g. `NL`, `DE`, `BE`) and a search term —
+  leave the search term empty or enter `*` to see all banks in that
+  country. Once selected, the bank is automatically added to your
+  favorites and will appear as a numbered quick option from then on.
+- The first time you use a bank, you'll need to log in via a link in your
+  browser to grant access (this is handled by GoCardless, not by this
+  script). After that, the link is remembered locally in `state.json`, so
+  you won't need to do this every run. If the link expires (after the
+  allowed period, often ~90 days), the script detects this automatically
+  and will show you the login link again.
+- The first import for an account fetches 90 days of history by default
+  (configurable via `INITIAL_HISTORY_DAYS` in `config.py`). Subsequent
+  runs only fetch transactions since the last imported date, with
+  deduplication by transaction ID so you never get duplicate transactions
+  in GnuCash.
+- For each account with new transactions, a file is written to `output/`,
+  e.g. `NL00INGB0000000000_2026-07-11.ofx`.
+
+#### If you have an older state.json
+
+Used this script before (with a fixed bank list in `config.py`)? No
+problem: on the first run, the script automatically converts your
+existing links to the new favorites format. You won't need to log in to
+your banks again.
+
+### Files
+
+- `main.py` — entry point, menu and orchestration
+- `gocardless_client.py` — API communication with GoCardless
+- `ofx_writer.py` — generates OFX 1.0.2 files directly (no external OFX library)
+- `state.py` — local storage of links and import history (`state.json`)
+- `i18n.py` — language strings (Dutch/English) and the language-selection logic
+- `language.txt` — your chosen language (`nl` or `en`), safe to edit by hand
+- `config.py` — settings (default country, history period, etc.)
+
+### Note
+
+- `state.json` and `.env` contain sensitive information (links/secrets) —
+  don't share them or commit them to version control.
+- GoCardless' free tier has a limit on API calls per link per day, so
+  avoid running the script too often in a row.
+- If an institution search returns multiple results (e.g. for Revolut,
+  which has multiple entities), you pick the right one from the menu;
+  that choice is then remembered.
+
+  ## Nederlands
 
 Haalt banktransacties op via GoCardless Bank Account Data en schrijft ze
 per rekening weg als `.ofx`-bestand, klaar om in GnuCash te importeren.
@@ -87,81 +167,3 @@ niet opnieuw in te loggen bij je banken.
 
 ---
 
-## English
-
-Fetches bank transactions via GoCardless Bank Account Data and writes them
-per account as an `.ofx` file, ready to import into GnuCash.
-
-### Installation
-
-```bash
-pip install -r requirements.txt
-cp .env.example .env
-```
-
-Fill in your GoCardless `GC_SECRET_ID` and `GC_SECRET_KEY` in `.env`
-(create these at https://bankaccountdata.gocardless.com/ → User secrets).
-
-### Language
-
-The very first time you run `python main.py`, it asks whether you want to
-use Dutch or English. That choice is saved in **`language.txt`** (plain
-text: `nl` or `en`) and won't be asked again after that.
-
-Want to change the language later? Open `language.txt` in a text editor
-and change its contents to `nl` or `en` — or delete the file to be asked
-again on the next run.
-
-### Usage
-
-```bash
-python main.py
-```
-
-- On startup you pick a bank from your **favorites** (banks you've used
-  before), or choose "Search for another bank..." to look up any bank
-  supported by GoCardless (e.g. Rabobank, Bunq, Triodos, or a foreign
-  bank). Enter a country code (e.g. `NL`, `DE`, `BE`) and a search term —
-  leave the search term empty or enter `*` to see all banks in that
-  country. Once selected, the bank is automatically added to your
-  favorites and will appear as a numbered quick option from then on.
-- The first time you use a bank, you'll need to log in via a link in your
-  browser to grant access (this is handled by GoCardless, not by this
-  script). After that, the link is remembered locally in `state.json`, so
-  you won't need to do this every run. If the link expires (after the
-  allowed period, often ~90 days), the script detects this automatically
-  and will show you the login link again.
-- The first import for an account fetches 90 days of history by default
-  (configurable via `INITIAL_HISTORY_DAYS` in `config.py`). Subsequent
-  runs only fetch transactions since the last imported date, with
-  deduplication by transaction ID so you never get duplicate transactions
-  in GnuCash.
-- For each account with new transactions, a file is written to `output/`,
-  e.g. `NL00INGB0000000000_2026-07-11.ofx`.
-
-#### If you have an older state.json
-
-Used this script before (with a fixed bank list in `config.py`)? No
-problem: on the first run, the script automatically converts your
-existing links to the new favorites format. You won't need to log in to
-your banks again.
-
-### Files
-
-- `main.py` — entry point, menu and orchestration
-- `gocardless_client.py` — API communication with GoCardless
-- `ofx_writer.py` — generates OFX 1.0.2 files directly (no external OFX library)
-- `state.py` — local storage of links and import history (`state.json`)
-- `i18n.py` — language strings (Dutch/English) and the language-selection logic
-- `language.txt` — your chosen language (`nl` or `en`), safe to edit by hand
-- `config.py` — settings (default country, history period, etc.)
-
-### Note
-
-- `state.json` and `.env` contain sensitive information (links/secrets) —
-  don't share them or commit them to version control.
-- GoCardless' free tier has a limit on API calls per link per day, so
-  avoid running the script too often in a row.
-- If an institution search returns multiple results (e.g. for Revolut,
-  which has multiple entities), you pick the right one from the menu;
-  that choice is then remembered.
