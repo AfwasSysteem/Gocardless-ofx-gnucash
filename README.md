@@ -10,6 +10,10 @@
 Fetches bank transactions via GoCardless Bank Account Data and writes them
 per account as an `.ofx` file, ready to import into GnuCash.
 
+### GoCardless support for new users
+GoCardless has ended support for new users. New users have reported that it is not possible to create an account. Enable Banking offers the same kind of API. I edited the script for use with the Enable Banking API. Users that cannot get an account with GoCardless, can use that version of the script.
+https://github.com/AfwasSysteem/Enablebanking-to-ofx
+
 ### Installation
 
 ```bash
@@ -88,6 +92,11 @@ your banks again.
 
 Haalt banktransacties op via GoCardless Bank Account Data en schrijft ze
 per rekening weg als `.ofx`-bestand, klaar om in GnuCash te importeren.
+
+### GoCardless ondersteuning voor nieuwe gebruikers
+GoCardless ondersteunt geen nieuwe gebruikers meer. Nieuwe gebruikers melden dat het niet langer mogelijk is om een account aan te maken. Enable Banking biedt een vergelijkbare API. Ik heb het script aangepast zodat het werkt met de API van Enable Banking. Gebruikers die geen account meer kunnen krijgen bij GoCardless, kunnen die versie van het script gebruiken.
+https://github.com/AfwasSysteem/Enablebanking-to-ofx
+
 
 ### Installatie
 
